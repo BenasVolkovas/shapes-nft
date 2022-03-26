@@ -10,15 +10,20 @@ const OPENSEA_LINK =
     "https://testnets.opensea.io/collection/shapesnft-k5hsyg1bwb";
 const TOTAL_MINT_COUNT = 50;
 
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const signer = provider.getSigner();
-const connectedContract = new ethers.Contract(
-    CONTRACT_ADDRESS,
-    ShapesNFT.abi,
-    signer
-);
+try {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const connectedContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        ShapesNFT.abi,
+        signer
+    );
+} catch (e) {
+    console.log(e);
+}
 
 const Home = () => {
+    console.log(321);
     const [totalMinted, setTotalMinted] = useState(0);
     const [isMining, setIsMining] = useState(false);
     const [userAccount, setUserAccount] = useState("");
