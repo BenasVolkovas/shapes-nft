@@ -53,10 +53,10 @@ const Home = () => {
     const getCount = async () => {
         try {
             const count = await connectedContract.count();
-            console.log(count);
+            console.log("COUNT: ", count);
             setTotalMinted(parseInt(count));
         } catch (e) {
-            console.log(e);
+            console.log("count error: ", e);
         }
     };
 
@@ -85,8 +85,8 @@ const Home = () => {
 
             await result.wait();
             setIsMining(false);
-            console.log(result.q);
-            console.log(result._hex);
+            console.log("normal: ", parseInt(result));
+            console.log("16: ", parseInt(result, 16));
             // alert(
             //     `Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${parseInt(
             //         tokenId
@@ -95,7 +95,7 @@ const Home = () => {
 
             getCount();
         } catch (e) {
-            console.log(e);
+            console.log("mint error: ", e);
         }
     };
 
