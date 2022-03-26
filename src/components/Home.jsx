@@ -53,8 +53,7 @@ const Home = () => {
     const getCount = async () => {
         try {
             const count = await connectedContract.count();
-            console.log("count: ", count.toNumber());
-            setTotalMinted(parseInt(count));
+            setTotalMinted(parseInt(count.toNumber()));
         } catch (e) {
             console.log(e);
         }
@@ -71,7 +70,16 @@ const Home = () => {
     };
 
     const setupEventListener = async () => {
-        console.log("Event set up");
+        try {
+            connectedContract.on("NewNFTMinted", (from, tokenId) => {
+                console.log(from, tokenId.toNumber());
+                alert(
+                    `Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
+                );
+            });
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     const mintToken = async () => {
@@ -85,17 +93,10 @@ const Home = () => {
 
             await result.wait();
             setIsMining(false);
-            console.log("normal: ", result.toNumber());
-            console.log("16: ", parseInt(result, 16));
-            // alert(
-            //     `Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${parseInt(
-            //         tokenId
-            //     )}`
-            // );
 
             getCount();
         } catch (e) {
-            console.log("mint error: ", e);
+            console.log(e);
         }
     };
 
