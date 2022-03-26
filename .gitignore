@@ -31,6 +31,6 @@ typechain
 
 #Hardhat files
 cache
-artifacts/hardhat
-artifacts/build-info
-artifacts/@openzeppelin
+artifacts/hardhat/**
+artifacts/build-info/**
+artifacts/@openzeppelin/**
