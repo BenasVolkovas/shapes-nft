@@ -42,7 +42,7 @@ const Home = () => {
     };
 
     const connectWallet = async () => {
-        const accounts = await ethereum.request({
+        const accounts = await window.ethereum.request({
             method: "eth_requestAccounts",
         });
 
@@ -51,13 +51,17 @@ const Home = () => {
     };
 
     const getCount = async () => {
-        const count = await connectedContract.count();
-        console.log(count);
-        setTotalMinted(parseInt(count));
+        try {
+            const count = await connectedContract.count();
+            console.log(count);
+            setTotalMinted(parseInt(count));
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     const checkCurrentChainId = async () => {
-        let chainId = await ethereum.request({ method: "eth_chainId" });
+        let chainId = await window.ethereum.request({ method: "eth_chainId" });
 
         // String, hex code of the chainId of the Rinkebey test network
         const rinkebyChainId = "0x4";
@@ -81,7 +85,8 @@ const Home = () => {
 
             await result.wait();
             setIsMining(false);
-            console.log(result);
+            console.log(result.q);
+            console.log(result._hex);
             // alert(
             //     `Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${parseInt(
             //         tokenId
