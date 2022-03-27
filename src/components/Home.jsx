@@ -17,11 +17,6 @@ const Home = () => {
     const connectedContract = "";
 
     useEffect(() => {
-        getCount();
-        checkIfWalletIsConnected();
-    }, []);
-
-    useEffect(() => {
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
@@ -33,6 +28,8 @@ const Home = () => {
         } catch (e) {
             console.log(e);
         }
+        getCount();
+        checkIfWalletIsConnected();
     }, [window.ethereum]);
 
     const checkIfWalletIsConnected = async () => {
