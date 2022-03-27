@@ -17,6 +17,10 @@ const Home = () => {
     const connectedContract = "";
 
     useEffect(() => {
+        console.log("ETHEREUM: ", window.ethereum);
+    });
+
+    useEffect(() => {
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
@@ -25,6 +29,7 @@ const Home = () => {
                 ShapesNFT.abi,
                 signer
             );
+            console.log(connectedContract);
         } catch (e) {
             console.log(e);
         }
@@ -88,6 +93,7 @@ const Home = () => {
 
     const mintToken = async () => {
         try {
+            console.log(connectedContract);
             const result = await connectedContract.payToMint({
                 from: userAccount,
                 value: ethers.utils.parseEther("0.05"),
