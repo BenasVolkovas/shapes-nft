@@ -11,32 +11,33 @@ const OPENSEA_LINK =
 const TOTAL_MINT_COUNT = 50;
 
 const Home = () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    let signer = provider.getSigner();
+    let connectedContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        ShapesNFT.abi,
+        signer
+    );
+
     const [totalMinted, setTotalMinted] = useState(0);
     const [isMining, setIsMining] = useState(false);
     const [userAccount, setUserAccount] = useState("");
-    let connectedContract = "";
 
     useEffect(() => {
-        console.log("ETHEREUM: ", window.ethereum);
-    });
-
-    useEffect(() => {
-        console.log("TRY to get");
-        try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            connectedContract = new ethers.Contract(
-                CONTRACT_ADDRESS,
-                ShapesNFT.abi,
-                signer
-            );
-            console.log(connectedContract);
-        } catch (e) {
-            console.log(e);
-        }
         getCount();
         checkIfWalletIsConnected();
-    }, [window.ethereum]);
+    }, []);
+
+    const getConnectedContract = () => {
+        signer = provider.getSigner();
+        connectedContract = new ethers.Contract(
+            CONTRACT_ADDRESS,
+            ShapesNFT.abi,
+            signer
+        );
+
+        getCount();
+    };
 
     const checkIfWalletIsConnected = async () => {
         const accounts = await window.ethereum.request({
@@ -46,7 +47,7 @@ const Home = () => {
         if (accounts.length !== 0) {
             checkCurrentChainId();
             setUserAccount(accounts[0]);
-
+            getConnectedContract();
             setupEventListener();
         }
     };
@@ -57,6 +58,7 @@ const Home = () => {
         });
 
         setUserAccount(accounts[0]);
+        getConnectedContract();
         setupEventListener();
     };
 
@@ -94,12 +96,9 @@ const Home = () => {
 
     const mintToken = async () => {
         try {
-            console.log(connectedContract);
             const result = await connectedContract.payToMint({
-                from: userAccount,
                 value: ethers.utils.parseEther("0.05"),
             });
-            console.log(result);
             setIsMining(true);
 
             await result.wait();
@@ -134,10 +133,12 @@ const Home = () => {
                 <p className="fs-2 fw-bold">
                     Each unique. Each beautiful. Discover your NFT today.
                 </p>
-                {totalMinted && (
+                {totalMinted ? (
                     <p className="fs-3">
                         {`${totalMinted}/${TOTAL_MINT_COUNT} NFTs minted so far`}
                     </p>
+                ) : (
+                    <></>
                 )}
                 <div>
                     <WalletBalance />
@@ -164,8 +165,8 @@ const Home = () => {
             </div>
             {isMining && (
                 <div>
-                    <div class="spinner-border text-light" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                    <div className="spinner-border text-light" role="status">
+                        <span className="visually-hidden">Loading...</span>
                     </div>
                     <p>Mining... please wait</p>
                 </div>
