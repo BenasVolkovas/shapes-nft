@@ -14,7 +14,7 @@ const Home = () => {
     const [totalMinted, setTotalMinted] = useState(0);
     const [isMining, setIsMining] = useState(false);
     const [userAccount, setUserAccount] = useState("");
-    const connectedContract = "";
+    let connectedContract = "";
 
     useEffect(() => {
         console.log("ETHEREUM: ", window.ethereum);
