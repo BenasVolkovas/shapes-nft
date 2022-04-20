@@ -128,13 +128,16 @@ const Home = () => {
 
             <div>
                 <p className="fw-bold title" style={{ fontSize: "60px" }}>
-                    My NFT Collection
+                    ShapesNFT Collection
                 </p>
-                <p className="fs-2 fw-bold">
+                <p className="fs-3 fw-bold">
                     Each unique. Each beautiful. Discover your NFT today.
                 </p>
+                <p className="fs-6">
+                    * Choose Rinkeby testnet and make sure you have 0.05 ETH
+                </p>
                 {totalMinted ? (
-                    <p className="fs-3">
+                    <p className="fs-5">
                         {`${totalMinted}/${TOTAL_MINT_COUNT} NFTs minted so far`}
                     </p>
                 ) : (
@@ -179,7 +182,7 @@ const Home = () => {
                     width="30"
                 />
                 <a href={LINKEDIN_LINK} target="_blank" rel="noreferrer">
-                    Connect with me via Linkedin
+                    Created by Benas
                 </a>
             </div>
         </div>

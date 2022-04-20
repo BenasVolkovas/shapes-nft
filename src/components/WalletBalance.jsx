@@ -15,7 +15,7 @@ function WalletBalance() {
 
     return (
         <div className="mt-5 mb-5">
-            <h5 className="card-title">Your ETH Balance: {balance}</h5>
+            <h5 className="card-title">Balance: {balance}</h5>
             <button className="btn btn-success" onClick={() => getBalance()}>
                 Show My Balance
             </button>
