@@ -4,108 +4,118 @@ import { ethers } from "ethers";
 import ShapesNFT from "../artifacts/contracts/ShapesNFT.sol/ShapesNFT.json";
 import LinkedinLogo from "../assets/linkedin.svg";
 
-const CONTRACT_ADDRESS = "0x9B75Acfa4caceDF41AC968EC2C2d45377c3cD3c2";
+const CONTRACT_ADDRESS = "0x5c3690588875119b5B7747446135AdE8456A35eB";
 const LINKEDIN_LINK = "https://www.linkedin.com/in/benas-volkovas/";
-const OPENSEA_LINK =
-    "https://testnets.opensea.io/collection/shapesnft-k5hsyg1bwb";
+const OPENSEA_LINK = "https://testnets.opensea.io/collection/shapesnft-1";
 const TOTAL_MINT_COUNT = 50;
+const GOERLI_CHAIN_ID = "0x5";
 
 const Home = () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    let signer = provider.getSigner();
-    let connectedContract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        ShapesNFT.abi,
-        signer
-    );
-
     const [totalMinted, setTotalMinted] = useState(0);
-    const [isMining, setIsMining] = useState(false);
-    const [userAccount, setUserAccount] = useState("");
+    const [isMinting, setIsMinting] = useState(false);
+    const [isConnected, setIsConnected] = useState(false);
+    const [provider, setProvider] = useState(null);
+    const [signer, setSigner] = useState(null);
+    const [providerContract, setProviderContract] = useState(null);
+    const [signerContract, setSignerContract] = useState(null);
 
     useEffect(() => {
-        getCount();
-        checkIfWalletIsConnected();
+        if (window.ethereum) {
+            isWalletConnected();
+        } else {
+            alert("Please install MetaMask!");
+        }
     }, []);
 
-    const getConnectedContract = () => {
-        signer = provider.getSigner();
-        connectedContract = new ethers.Contract(
-            CONTRACT_ADDRESS,
-            ShapesNFT.abi,
-            signer
-        );
+    useEffect(() => {
+        if (providerContract) {
+            getCount();
+        }
+    }, [providerContract]);
 
-        getCount();
-    };
+    useEffect(() => {
+        if (provider) {
+            setProviderContract(
+                new ethers.Contract(CONTRACT_ADDRESS, ShapesNFT.abi, provider)
+            );
+        }
+    }, [provider]);
 
-    const checkIfWalletIsConnected = async () => {
+    useEffect(() => {
+        if (signer) {
+            setSignerContract(
+                new ethers.Contract(
+                    CONTRACT_ADDRESS,
+                    ShapesNFT.abi,
+                    signer
+                ).connect(signer)
+            );
+
+            isCorrectNetwork();
+        }
+    }, [signer]);
+
+    const isWalletConnected = async () => {
+        const tempProvider = new ethers.providers.Web3Provider(window.ethereum);
+        setProvider(tempProvider);
+
         const accounts = await window.ethereum.request({
             method: "eth_accounts",
         });
 
         if (accounts.length !== 0) {
-            checkCurrentChainId();
-            setUserAccount(accounts[0]);
-            getConnectedContract();
-            setupEventListener();
+            setSigner(tempProvider.getSigner());
+            setIsConnected(true);
+        }
+    };
+
+    const isCorrectNetwork = async () => {
+        let chainId = await window.ethereum.request({
+            method: "eth_chainId",
+        });
+
+        if (chainId !== GOERLI_CHAIN_ID) {
+            alert("You are not connected to the Goerli Testnet!");
         }
     };
 
     const connectWallet = async () => {
-        const accounts = await window.ethereum.request({
-            method: "eth_requestAccounts",
-        });
+        if (!isConnected) {
+            await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
 
-        setUserAccount(accounts[0]);
-        getConnectedContract();
-        setupEventListener();
+            setSigner(provider.getSigner());
+            setIsConnected(true);
+        }
     };
 
     const getCount = async () => {
         try {
-            const count = await connectedContract.count();
-            setTotalMinted(parseInt(count.toNumber()));
+            const count = await providerContract.count();
+            setTotalMinted(count.toNumber());
         } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const checkCurrentChainId = async () => {
-        let chainId = await window.ethereum.request({ method: "eth_chainId" });
-
-        // String, hex code of the chainId of the Rinkebey test network
-        const rinkebyChainId = "0x4";
-        if (chainId !== rinkebyChainId) {
-            alert("You are not connected to the Rinkeby Test Network!");
-        }
-    };
-
-    const setupEventListener = async () => {
-        try {
-            connectedContract.on("NewNFTMinted", (from, tokenId) => {
-                console.log(from, tokenId.toNumber());
-                alert(
-                    `Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
-                );
-            });
-        } catch (e) {
-            console.log(e);
+            alert("Error getting total minted count");
         }
     };
 
     const mintToken = async () => {
         try {
-            const result = await connectedContract.payToMint({
+            setIsMinting(true);
+
+            const result = await signerContract.payToMint({
                 value: ethers.utils.parseEther("0.05"),
             });
-            setIsMining(true);
-
             await result.wait();
-            setIsMining(false);
 
+            setIsMinting(false);
+
+            alert(
+                `Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${totalMinted}`
+            );
             getCount();
         } catch (e) {
+            alert("Error minting NFT");
             console.log(e);
         }
     };
@@ -124,8 +134,6 @@ const Home = () => {
                 justifyContent: "space-between",
             }}
         >
-            {/* <WalletBalance /> */}
-
             <div>
                 <p className="fw-bold title" style={{ fontSize: "60px" }}>
                     ShapesNFT Collection
@@ -134,7 +142,7 @@ const Home = () => {
                     Each unique. Each beautiful. Discover your NFT today.
                 </p>
                 <p className="fs-6">
-                    * Choose Rinkeby testnet and make sure you have 0.05 ETH
+                    Choose Goerli testnet and make sure you have 0.05 ETH
                 </p>
                 {totalMinted ? (
                     <p className="fs-5">
@@ -152,7 +160,7 @@ const Home = () => {
                     >
                         🌊 View Collection on OpenSea
                     </button>
-                    {userAccount === "" ? (
+                    {!isConnected ? (
                         <button
                             className="btn btn-light"
                             onClick={connectWallet}
@@ -166,22 +174,21 @@ const Home = () => {
                     )}
                 </div>
             </div>
-            {isMining && (
+            {isMinting && (
                 <div>
                     <div className="spinner-border text-light" role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
-                    <p>Mining... please wait</p>
+                    <p>Minting... please wait</p>
                 </div>
             )}
             <div>
-                <img
-                    className="me-2"
-                    alt="Linkedin Logo"
-                    src={LinkedinLogo}
-                    width="30"
-                />
-                <a href={LINKEDIN_LINK} target="_blank" rel="noreferrer">
+                <a
+                    href={LINKEDIN_LINK}
+                    className="text-light"
+                    target="_blank"
+                    rel="noreferrer"
+                >
                     Created by Benas
                 </a>
             </div>
